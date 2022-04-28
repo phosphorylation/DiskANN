@@ -36,6 +36,8 @@ int search_memory_index(int argc, char** argv) {
     metric = diskann::Metric::L2;
   else if (std::string(argv[ctr]) == std::string("fast_l2"))
     metric = diskann::Metric::FAST_L2;
+  else if (std::string(argv[ctr]) == std::string("hamming"))
+    metric = diskann::Metric::Hamming;
   else {
     std::cout << "Unsupported distance function. Currently only L2/ Inner "
                  "Product/FAST_L2 support."

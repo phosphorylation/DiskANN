@@ -41,6 +41,8 @@
 
 // only L2 implemented. Need to implement inner product search
 namespace {
+  size_t diskANN_nd;
+
   template<typename T>
   diskann::Distance<T> *get_distance_function(diskann::Metric m);
 
@@ -102,13 +104,32 @@ namespace {
                    "slow version. "
                 << std::endl;
       return new diskann::DistanceL2UInt8();
-    } else {
-      std::string error_msg(
-          "Only L2 distance function supported for uint8_t type");
-      throw diskann::ANNException(error_msg, -1, __FUNCSIG__, __FILE__,
-                                  __LINE__);
+    } else if(m==diskann::Metric::Hamming) {
+      std::cout <<"Using hamming distance." <<std::endl;
+#define HC(name) return new diskann::DistanceHamming<name>(name())
+      switch (diskANN_nd/8) {
+        case 4:
+          HC(faiss::HammingComputer4);
+        case 8:
+          HC(faiss::HammingComputer8);
+        case 16:
+          HC(faiss::HammingComputer16);
+        case 20:
+          HC(faiss::HammingComputer20);
+        case 32:
+          HC(faiss::HammingComputer32);
+        case 64:
+          HC(faiss::HammingComputer64);
+        default:
+          HC(faiss::HammingComputerDefault);
+      }
+    }else {
+        std::string error_msg(
+            "Only L2 distance function supported for uint8_t type");
+        throw diskann::ANNException(error_msg, -1, __FUNCSIG__, __FILE__,
+                                    __LINE__);
+        }
     }
-  }
 }  // namespace
 
 namespace diskann {
@@ -175,7 +196,7 @@ namespace diskann {
                                     __LINE__);
       }
     }
-
+    diskANN_nd = nd;
     this->_distance = ::get_distance_function<T>(m);
     _locks = std::vector<std::mutex>(_max_points + _num_frozen_pts);
     _width = 0;

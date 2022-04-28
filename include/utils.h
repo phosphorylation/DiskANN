@@ -64,7 +64,7 @@ typedef int8_t   _s8;
 namespace diskann {
   static const size_t MAX_SIZE_OF_STREAMBUF = 2LL * 1024 * 1024 * 1024;
 
-  enum Metric { L2 = 0, INNER_PRODUCT = 1, FAST_L2 = 2, PQ = 3 };
+  enum Metric { L2 = 0, INNER_PRODUCT = 1, FAST_L2 = 2, PQ = 3, Hamming=4 };
 
   inline void alloc_aligned(void** ptr, size_t size, size_t align) {
     *ptr = nullptr;
@@ -728,6 +728,12 @@ inline bool validate_index_file_size(std::ifstream& in) {
     return false;
   }
   return true;
+}
+
+inline void binary_to_real(size_t d, const uint8_t* x_in, float* x_out) {
+  for (size_t i = 0; i < d; ++i) {
+    x_out[i] = 2 * ((x_in[i >> 3] >> (i & 7)) & 1) - 1;
+  }
 }
 
 #ifdef _WINDOWS

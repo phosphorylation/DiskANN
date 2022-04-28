@@ -46,7 +46,7 @@ int build_in_memory_index(const std::string&     data_path,
 int main(int argc, char** argv) {
   if (argc != 9) {
     std::cout << "Usage: " << argv[0] << "  "
-              << "data_type<int8/uint8/float>  dist_fn<l2/mips> "
+              << "data_type<int8/uint8/float>  dist_fn<l2/mips/hamming> "
               << "data_file.bin   output_index_file  "
               << "R(graph degree)   L(build complexity)  "
               << "alpha(graph diameter control)   T(num_threads)" << std::endl;
@@ -60,6 +60,8 @@ int main(int argc, char** argv) {
     metric = diskann::Metric::INNER_PRODUCT;
   else if (std::string(argv[ctr]) == std::string("l2"))
     metric = diskann::Metric::L2;
+  else if (std::string(argv[ctr]) == std::string("hamming"))
+    metric = diskann::Metric::Hamming;
   else {
     std::cerr << "Unsupported distance function. Currently only L2/ Inner "
                  "Product support."

@@ -12,6 +12,7 @@
 
 #include <cosine_similarity.h>
 #include <iostream>
+#include "hamming.h"
 
 namespace {
   static inline __m128 _mm_mulhi_epi8(__m128i X) {
@@ -111,6 +112,21 @@ namespace diskann {
     float compare(const T *a, const T *b, unsigned length) const {
       return diskann::compute_cosine_similarity<T>(a, b, length);
     }
+  };
+
+  using namespace faiss;
+  template<class HammingComputer>
+  class DistanceHamming : public Distance<uint8_t> {
+    mutable HammingComputer hc;
+
+   public:
+    explicit DistanceHamming(HammingComputer hc_):hc(hc_) {
+    }
+
+    float compare(const uint8_t *a, const uint8_t *b, unsigned size) const {
+      hc.set(a, static_cast<int>(size));
+      return hc.hamming(b);
+    };
   };
 
   class DistanceL2Int8 : public Distance<int8_t> {
